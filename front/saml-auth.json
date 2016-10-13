@@ -1,0 +1,9 @@
+{
+    "name": "SAML Auth",
+    "slug": "saml-auth",
+    "description": "Authenticate with SAML.",
+    "type": "auth",
+    "module": "taigaContrib.samlAuth",
+    "template": "/plugins/saml-auth/saml-auth.html",
+    "js": "/plugins/saml-auth/saml-auth.js"
+}
