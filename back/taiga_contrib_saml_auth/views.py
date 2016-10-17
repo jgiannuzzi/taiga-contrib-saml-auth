@@ -29,7 +29,7 @@ def get_saml_auth(request):
 @require_http_methods(['GET'])
 def initiate_login(request):
     auth = get_saml_auth(request)
-    return_url = request.GET.get('next', '/')
+    return_url = request.GET.get('next', '/login')
     return HttpResponseRedirect(auth.login(return_to=return_url))
 
 
@@ -52,11 +52,9 @@ def complete_login(request):
         request.session['saml_session_index'] = auth.get_session_index()
 
         params = {'state': 'saml'}
+        url = request.POST.get('RelayState', '/login')
 
-        if 'RelayState' in request.POST:
-            params['next'] = request.POST['RelayState']
-
-        return HttpResponseRedirect(auth.redirect_to('/login', parameters=params))
+        return HttpResponseRedirect(auth.redirect_to(url, parameters=params))
 
     else:
         raise PermissionDenied()

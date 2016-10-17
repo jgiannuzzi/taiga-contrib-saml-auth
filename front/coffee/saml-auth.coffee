@@ -47,10 +47,8 @@ SamlLoginButtonDirective = ($window, $params, $location, $config, $events, $conf
         loginWithSamlAccount()
 
         $el.on "click", ".button-auth", (event) ->
-            if $params.next
-                url = "#{AUTH_URL}?next=#{$params.next}"
-            else
-                url = AUTH_URL
+            redirectToUri = $location.absUrl()
+            url = "#{AUTH_URL}?next=#{redirectToUri}"
             $window.location.href = url
 
         $scope.$on "$destroy", ->
