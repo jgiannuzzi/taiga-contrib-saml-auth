@@ -23,98 +23,122 @@ Modify your `settings/local.py` and include the lines:
 INSTALLED_APPS += ["taiga_contrib_saml_auth"]
 
 SAML_AUTH = {
-        # Service Provider settings (yourself)
-        'sp': {
-            # Uncomment if you want to specify a NameIDFormat
-            #'nameIDFormat': 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
+    # Service Provider settings (yourself)
+    'sp': {
+        # 'entityId', 'assertionConsumerService' and 'singleLogoutService' will be set automatically.
 
-            # This is your own Service Provider certificate
-            'cert': '''-----BEGIN CERTIFICATE-----
-            ...
-            -----END CERTIFICATE-----''',
+        # Uncomment if you want to specify a NameIDFormat
+        #'NameIDFormat': 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
 
-            # This is your own Service Provider private key
-            'key': '''-----BEGIN RSA PRIVATE KEY-----
-            ...
-            -----END RSA PRIVATE KEY-----''',
-            },
+        # This is your own Service Provider certificate
+        'x509cert': '''-----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----''',
 
-        # Identity Provider settings (your partner doing the authentication)
-        # These settings can be found in their metadata
-        'idp': {
-            'entityID': 'YOUR_IDP_ENTITY_ID',
-            'singleSignOnURL': 'YOUR_IDP_SSO_URL',
-            'singleLogoutURL': 'YOUR_IDP_SLO_URL',
+        # This is your own Service Provider private key
+        'privateKey': '''-----BEGIN RSA PRIVATE KEY-----
+        ...
+        -----END RSA PRIVATE KEY-----''',
+    },
 
-            # use either cert OR certFingerprint
-            # This is the Identity Provider certificate
-            'cert': '''-----BEGIN CERTIFICATE-----
-            ...
-            -----END CERTIFICATE-----''',
-            # This is the Identify Provider certificate fingerprint
-            # (Generate it with: openssl x509 -in YOUR_IDP_CERTIFICATE -noout -fingerprint | cut -d'=' -f2 | tr -d : | tr A-Z a-z)
-            #'certFingerprint': 'YOUR_IDP_CERTIFICATE_FINGERPRINT',
-            },
+    #
+    # For more options and detailed description see https://github.com/onelogin/python3-saml
+    #
+    # Identity Provider settings (your partner doing the authentication)
+    # These settings can be found in their metadata
+    'idp': {
+        # Identifier of the IdP entity  (must be a URI)
+        'entityID': 'YOUR_IDP_ENTITY_ID',
 
-        # Security settings
-        'security': {
-            # These are the defaults
-            #'nameIdEncrypted': False,
-            #'authnRequestsSigned': False,
-            #'logoutRequestSigned': False,
-            #'logoutResponseSigned': False,
-            #'signMetadata': False,
-            #'wantMessagesSigned': False,
-            #'wantAssertionsSigned': False,
-            #'wantNameId': True,
-            #'wantAssertionsEncrypted': False,
-            #'wantNameIdEncrypted': False,
-            #'wantAttributeStatement': True,
-            #'requestedAuthnContext': True,
-            },
+        # SSO endpoint info of the IdP. (Authentication Request protocol)
+        "singleSignOnService": {
+            # URL Target of the IdP where the Authentication Request Message
+            # will be sent.
+            "url": 'YOUR_IDP_SSO_URL',
+            # SAML protocol binding to be used when returning the <Response>
+            # message. OneLogin Toolkit supports the HTTP-Redirect binding
+            # only for this endpoint.
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
+        # SLO endpoint info of the IdP.
+        "singleLogoutService": {
+            # URL Location of the IdP where SLO Request will be sent.
+            "url": 'YOUR_IDP_SLO_URL',
+            # SAML protocol binding to be used when returning the <Response>
+            # message. OneLogin Toolkit supports the HTTP-Redirect binding
+            # only for this endpoint.
+            "binding": "urn:oasis:names:tc:SAML:2.0:bindings:HTTP-Redirect"
+        },
 
-        'organization': {
-            # Organization information template, the info in en_US lang is
-            # recommended, add more if required.
-            'en-US': {
-                'name': 'organization',
-                'displayname': 'Organization Name',
-                'url': 'https://www.example.org/',
-                },
-            },
+        # use either cert OR certFingerprint
+        # This is the Identity Provider certificate
+        'x509cert': '''-----BEGIN CERTIFICATE-----
+        ...
+        -----END CERTIFICATE-----''',
+        # This is the Identify Provider certificate fingerprint
+        # (Generate it with: openssl x509 -in YOUR_IDP_CERTIFICATE -noout -fingerprint | cut -d'=' -f2 | tr -d : | tr A-Z a-z)
+        #'certFingerprint': 'YOUR_IDP_CERTIFICATE_FINGERPRINT',
+    },
 
-        'contactPerson': {
-            # Contact information template, it is recommended to suply a
-            # technical and support contacts.
-            'technical': {
-                'givenName': 'technical_name',
-                'emailAddress': 'technical@example.com'
-                },
-            'support': {
-                'givenName': 'support_name',
-                'emailAddress': 'support@example.com'
-                },
-            },
+    # Security settings
+    'security': {
+        # These are the defaults
+        #'nameIdEncrypted': False,
+        #'authnRequestsSigned': False,
+        #'logoutRequestSigned': False,
+        #'logoutResponseSigned': False,
+        #'signMetadata': False,
+        #'wantMessagesSigned': False,
+        #'wantAssertionsSigned': False,
+        #'wantNameId': True,
+        #'wantAssertionsEncrypted': False,
+        #'wantNameIdEncrypted': False,
+        #'wantAttributeStatement': True,
+        #'requestedAuthnContext': True,
+    },
 
-        # Mapping between the SAML user and the Taiga user
-        'mapping': {
-            # Uncomment to use a specific attribute as the SAML ID to link the Taiga user and the SAML user
-            # By default, the SAML NameID will be used
-            #'id': 'SAML_ATTRIBUTE_NAME',
+    'organization': {
+        # Organization information template, the info in en_US lang is
+        # recommended, add more if required.
+        'en-US': {
+            'name': 'organization',
+            'displayname': 'Organization Name',
+            'url': 'https://www.example.org/',
+        },
+    },
 
-            # You need to define at least email, username and full_name
-            # (username and full_name can map to the same SAML attribute, as the username will be derived as
-            # a unique slug from the given attribute)
-            'attributes': {
-                'email': 'SAML_ATTRIBUTE_NAME_EMAIL',
-                'username': 'SAML_ATTRIBUTE_NAME_USERNAME',
-                'full_name': 'SAML_ATTRIBUTE_NAME_FULLNAME',
-                #'bio': 'SAML_ATTRIBUTE_NAME_BIO',
-                #'lang': 'SAML_ATTRIBUTE_NAME_LANG',
-                #'timezone': 'SAML_ATTRIBUTE_NAME_TIMEZONE',
-                },
-            },
-        }
+    'contactPerson': {
+        # Contact information template, it is recommended to suply a
+        # technical and support contacts.
+        'technical': {
+            'givenName': 'technical_name',
+            'emailAddress': 'technical@example.com'
+        },
+        'support': {
+            'givenName': 'support_name',
+            'emailAddress': 'support@example.com'
+        },
+    },
+
+    # Mapping between the SAML user and the Taiga user
+    'mapping': {
+        # Uncomment to use a specific attribute as the SAML ID to link the Taiga user and the SAML user
+        # By default, the SAML NameID will be used
+        #'id': 'SAML_ATTRIBUTE_NAME',
+
+        # You need to define at least email, username and full_name
+        # (username and full_name can map to the same SAML attribute, as the username will be derived as
+        # a unique slug from the given attribute)
+        'attributes': {
+            'email': 'SAML_ATTRIBUTE_NAME_EMAIL',
+            'username': 'SAML_ATTRIBUTE_NAME_USERNAME',
+            'full_name': 'SAML_ATTRIBUTE_NAME_FULLNAME',
+            # 'bio': 'SAML_ATTRIBUTE_NAME_BIO',
+            # 'lang': 'SAML_ATTRIBUTE_NAME_LANG',
+            # 'timezone': 'SAML_ATTRIBUTE_NAME_TIMEZONE',
+        },
+    },
+}
 
 ```
 
@@ -184,106 +208,8 @@ workon taiga
 pip install -e .
 ```
 
-Modify `taiga-back/settings/local.py` and include the line:
+Modify `taiga-back/settings/local.py`. See "Production env -> Taiga Back" section for content:
 
-```python
-INSTALLED_APPS += ["taiga_contrib_saml_auth"]
-
-SAML_AUTH = {
-        # Service Provider settings (yourself)
-        'sp': {
-            # Uncomment if you want to specify a NameIDFormat
-            #'nameIDFormat': 'urn:oasis:names:tc:SAML:2.0:nameid-format:transient',
-
-            # This is your own Service Provider certificate
-            'cert': '''-----BEGIN CERTIFICATE-----
-            ...
-            -----END CERTIFICATE-----''',
-
-            # This is your own Service Provider private key
-            'key': '''-----BEGIN RSA PRIVATE KEY-----
-            ...
-            -----END RSA PRIVATE KEY-----''',
-            },
-
-        # Identity Provider settings (your partner doing the authentication)
-        # These settings can be found in their metadata
-        'idp': {
-            'entityID': 'YOUR_IDP_ENTITY_ID',
-            'singleSignOnURL': 'YOUR_IDP_SSO_URL',
-            'singleLogoutURL': 'YOUR_IDP_SLO_URL',
-
-            # use either cert OR certFingerprint
-            # This is the Identity Provider certificate
-            'cert': '''-----BEGIN CERTIFICATE-----
-            ...
-            -----END CERTIFICATE-----''',
-            # This is the Identify Provider certificate fingerprint
-            # (Generate it with: openssl x509 -in YOUR_IDP_CERTIFICATE -noout -fingerprint | cut -d'=' -f2 | tr -d : | tr A-Z a-z)
-            #'certFingerprint': 'YOUR_IDP_CERTIFICATE_FINGERPRINT',
-            },
-
-        # Security settings
-        'security': {
-            # These are the defaults
-            #'nameIdEncrypted': False,
-            #'authnRequestsSigned': False,
-            #'logoutRequestSigned': False,
-            #'logoutResponseSigned': False,
-            #'signMetadata': False,
-            #'wantMessagesSigned': False,
-            #'wantAssertionsSigned': False,
-            #'wantNameId': True,
-            #'wantAssertionsEncrypted': False,
-            #'wantNameIdEncrypted': False,
-            #'wantAttributeStatement': True,
-            #'requestedAuthnContext': True,
-            },
-
-        'organization': {
-            # Organization information template, the info in en_US lang is
-            # recommended, add more if required.
-            'en-US': {
-                'name': 'organization',
-                'displayname': 'Organization Name',
-                'url': 'https://www.example.org/',
-                },
-            },
-
-        'contactPerson': {
-            # Contact information template, it is recommended to suply a
-            # technical and support contacts.
-            'technical': {
-                'givenName': 'technical_name',
-                'emailAddress': 'technical@example.com'
-                },
-            'support': {
-                'givenName': 'support_name',
-                'emailAddress': 'support@example.com'
-                },
-            },
-
-        # Mapping between the SAML user and the Taiga user
-        'mapping': {
-            # Uncomment to use a specific attribute as the SAML ID to link the Taiga user and the SAML user
-            # By default, the SAML NameID will be used
-            #'id': 'SAML_ATTRIBUTE_NAME',
-
-            # You need to define at least email, username and full_name
-            # (username and full_name can map to the same SAML attribute, as the username will be derived as
-            # a unique slug from the given attribute)
-            'attributes': {
-                'email': 'SAML_ATTRIBUTE_NAME_EMAIL',
-                'username': 'SAML_ATTRIBUTE_NAME_USERNAME',
-                'full_name': 'SAML_ATTRIBUTE_NAME_FULLNAME',
-                #'bio': 'SAML_ATTRIBUTE_NAME_BIO',
-                #'lang': 'SAML_ATTRIBUTE_NAME_LANG',
-                #'timezone': 'SAML_ATTRIBUTE_NAME_TIMEZONE',
-                },
-            },
-        }
-
-```
 
 Modify your `taiga/urls.py` and include these lines:
 
