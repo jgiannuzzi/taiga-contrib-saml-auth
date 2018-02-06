@@ -48,7 +48,7 @@ SAML_AUTH = {
     # These settings can be found in their metadata
     'idp': {
         # Identifier of the IdP entity  (must be a URI)
-        'entityID': 'YOUR_IDP_ENTITY_ID',
+        'entityId': 'YOUR_IDP_ENTITY_ID',
 
         # SSO endpoint info of the IdP. (Authentication Request protocol)
         "singleSignOnService": {
